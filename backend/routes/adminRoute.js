@@ -1,16 +1,20 @@
-// adminRoute.js
 import express from 'express';
 import Admin from '../models/adminModel';
 import { isAuth, isAdmin } from '../util';
 
 const router = express.Router();
 
-// Create a new admin (requires admin privileges)
+// Create a new admin (requires super admin privileges)
 router.post('/create', isAuth, isAdmin, (req, res) => {
-    const { adminLevel, permissions } = req.body;
+    const { username, role, permissions } = req.body;
+
+    if (req.user.role !== 'Super Admin') {
+        return res.status(403).send({ msg: 'Permission denied' });
+    }
 
     const admin = new Admin({
-        adminLevel,
+        username,
+        role,
         permissions,
     });
 
@@ -19,15 +23,23 @@ router.post('/create', isAuth, isAdmin, (req, res) => {
         .catch((err) => res.status(500).send({ msg: err.message }));
 });
 
-// Get all admins (requires admin privileges)
+// Get all admins (requires super admin privileges)
 router.get('/', isAuth, isAdmin, (req, res) => {
+    if (req.user.role !== 'Super Admin') {
+        return res.status(403).send({ msg: 'Permission denied' });
+    }
+
     Admin.find({})
         .then((admins) => res.send(admins))
         .catch((err) => res.status(500).send({ msg: err.message }));
 });
 
-// Update admin permissions (requires admin privileges)
+// Update admin permissions (requires super admin privileges)
 router.put('/:adminId/permissions', isAuth, isAdmin, (req, res) => {
+    if (req.user.role !== 'Super Admin') {
+        return res.status(403).send({ msg: 'Permission denied' });
+    }
+
     const { permissions } = req.body;
 
     Admin.findByIdAndUpdate(req.params.adminId, { permissions }, { new: true })
@@ -40,8 +52,12 @@ router.put('/:adminId/permissions', isAuth, isAdmin, (req, res) => {
         .catch((err) => res.status(500).send({ msg: err.message }));
 });
 
-// Delete an admin (requires admin privileges)
+// Delete an admin (requires super admin privileges)
 router.delete('/:adminId', isAuth, isAdmin, (req, res) => {
+    if (req.user.role !== 'Super Admin') {
+        return res.status(403).send({ msg: 'Permission denied' });
+    }
+
     Admin.findByIdAndRemove(req.params.adminId)
         .then((removedAdmin) => {
             if (!removedAdmin) {

@@ -3,8 +3,9 @@ import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 
 const adminSchema = new Schema({
-    adminLevel: { type: String, required: true }, // E.g., "Super Admin," "Manager," "Operator"
-    permissions: [{ type: String }], // E.g., "CreateUser", "ManageOrders", "ViewReports"
+    username: { type: String, required: true },
+    role: { type: String, required: true }, // E.g., "Super Admin," "Manager," "Operator"
+    permissions: [{ type: String }], // E.g., "ViewProduct", "EditDelivery", "GrantPermissions", etc.
     // Add other fields specific to admins
 }, {
     timestamps: true,
